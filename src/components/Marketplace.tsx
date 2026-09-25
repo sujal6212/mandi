@@ -15,6 +15,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { Crop, User } from '../types';
+import { getAssetUrl } from '../utils/assets';
 
 interface MarketplaceProps {
   crops: Crop[];
@@ -246,7 +247,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({
                   {/* Card Thumbnail Area */}
                   <div className="relative bg-slate-50 h-48 border-b border-slate-100 p-4 flex items-center justify-center overflow-hidden">
                     <img
-                      src={crop.imageUrl}
+                      src={getAssetUrl(crop.imageUrl || (crop as any).image)}
                       alt={crop.name}
                       className="max-h-36 max-w-full object-contain drop-shadow-sm group-hover:scale-105 transition-transform duration-200"
                     />

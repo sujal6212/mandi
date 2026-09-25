@@ -6,10 +6,14 @@ import { MandiPrices } from './components/MandiPrices';
 import { AiVisionLab } from './components/AiVisionLab';
 import { FarmerDashboard } from './components/FarmerDashboard';
 import { AdminDashboard } from './components/AdminDashboard';
+import { BackendHub } from './components/BackendHub';
+import { DatabaseExplorer } from './components/DatabaseExplorer';
+import { BuyerFarmerCommunication } from './components/BuyerFarmerCommunication';
+import { AuthModal } from './components/AuthModal';
 import { AiChatbotModal } from './components/AiChatbotModal';
 import { CropDetailModal } from './components/CropDetailModal';
 import { Crop, Auction, Mandi, MandiPrice, Notification, User, Bid, Inquiry } from './types';
-import { Sprout, Download, ShieldCheck, Heart } from 'lucide-react';
+import { Sprout, Download, ShieldCheck, Server, Database, Code2, Tractor, Building2, MessageSquare, TrendingUp } from 'lucide-react';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<string>('marketplace');
@@ -27,6 +31,7 @@ export default function App() {
 
   // Modals
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [detailCrop, setDetailCrop] = useState<Crop | null>(null);
 
   // Initial Data Fetching
@@ -249,6 +254,21 @@ export default function App() {
     }
   };
 
+  // Safe farmer object fallback if user visits farmer-portal while guest
+  const activeFarmerUser = (currentUser?.role === 'farmer' ? currentUser : availableUsers.find(u => u.role === 'farmer')) || {
+    id: 1,
+    name: 'Ramesh Kumar',
+    email: 'ramesh.farmer@mandimart.in',
+    phone: '9876543210',
+    role: 'farmer' as const,
+    district: 'Karnal',
+    state: 'Haryana',
+    village: 'Taraori',
+    pincode: '132116',
+    address: 'VPO Taraori',
+    createdAt: '2026-08-10 09:30:00'
+  };
+
   return (
     <div className="min-h-screen bg-[#F8FAF6] text-[#1B3022] flex flex-col font-sans">
       {/* Universal Navigation */}
@@ -260,11 +280,57 @@ export default function App() {
         availableUsers={availableUsers}
         notifications={notifications}
         onOpenChat={() => setIsChatOpen(true)}
+        onOpenAuth={() => setIsAuthOpen(true)}
         onMarkNotificationsRead={handleMarkNotificationsRead}
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
+        {/* Navigation Quick Bar for Mobile / Tablet */}
+        <div className="lg:hidden mb-4 overflow-x-auto pb-2 flex items-center gap-1 text-xs">
+          <button
+            onClick={() => setCurrentView('marketplace')}
+            className={`px-3 py-1.5 rounded-full whitespace-nowrap font-medium ${
+              currentView === 'marketplace' ? 'bg-emerald-800 text-white' : 'bg-white border text-slate-700'
+            }`}
+          >
+            Buyer Marketplace
+          </button>
+          <button
+            onClick={() => setCurrentView('farmer-portal')}
+            className={`px-3 py-1.5 rounded-full whitespace-nowrap font-medium ${
+              currentView === 'farmer-portal' ? 'bg-emerald-800 text-white' : 'bg-white border text-slate-700'
+            }`}
+          >
+            Farmer Portal
+          </button>
+          <button
+            onClick={() => setCurrentView('communication')}
+            className={`px-3 py-1.5 rounded-full whitespace-nowrap font-medium ${
+              currentView === 'communication' ? 'bg-emerald-800 text-white' : 'bg-white border text-slate-700'
+            }`}
+          >
+            Buyer-Farmer Chat
+          </button>
+          <button
+            onClick={() => setCurrentView('backend-hub')}
+            className={`px-3 py-1.5 rounded-full whitespace-nowrap font-medium ${
+              currentView === 'backend-hub' ? 'bg-amber-400 text-amber-950 font-bold' : 'bg-white border text-slate-700'
+            }`}
+          >
+            Backend (PHP/Python)
+          </button>
+          <button
+            onClick={() => setCurrentView('database')}
+            className={`px-3 py-1.5 rounded-full whitespace-nowrap font-medium ${
+              currentView === 'database' ? 'bg-emerald-800 text-white' : 'bg-white border text-slate-700'
+            }`}
+          >
+            Database (MySQL)
+          </button>
+        </div>
+
+        {/* View 1: Buyer Marketplace */}
         {currentView === 'marketplace' && (
           <Marketplace
             crops={crops}
@@ -276,6 +342,56 @@ export default function App() {
           />
         )}
 
+        {/* View 2: Farmer Portal */}
+        {currentView === 'farmer-portal' && (
+          <FarmerDashboard
+            currentUser={activeFarmerUser}
+            crops={crops}
+            inquiries={inquiries}
+            onAddCrop={handleAddCrop}
+            onDeleteCrop={handleDeleteCrop}
+            onUpdateInquiryStatus={handleUpdateInquiryStatus}
+          />
+        )}
+
+        {/* View 3: Buyer-Farmer Communication Center */}
+        {currentView === 'communication' && (
+          <BuyerFarmerCommunication
+            inquiries={inquiries}
+            currentUser={currentUser}
+            crops={crops}
+            users={availableUsers}
+            onUpdateStatus={handleUpdateInquiryStatus}
+            onSendNewInquiry={handleSendInquiry}
+            onOpenAuth={() => setIsAuthOpen(true)}
+          />
+        )}
+
+        {/* View 4: Mandi Benchmark Rates & Distances */}
+        {currentView === 'mandi-prices' && (
+          <MandiPrices
+            mandis={mandis}
+            prices={mandiPrices}
+          />
+        )}
+
+        {/* View 5: Backend (Server Side) Hub - PHP & Python */}
+        {currentView === 'backend-hub' && (
+          <BackendHub />
+        )}
+
+        {/* View 6: Database (MySQL) Explorer */}
+        {currentView === 'database' && (
+          <DatabaseExplorer
+            users={availableUsers}
+            crops={crops}
+            prices={mandiPrices}
+            mandis={mandis}
+            inquiries={inquiries}
+          />
+        )}
+
+        {/* View 7: Live Auctions */}
         {currentView === 'auctions' && (
           <Auctions
             auctions={auctions}
@@ -286,28 +402,12 @@ export default function App() {
           />
         )}
 
-        {currentView === 'mandi-prices' && (
-          <MandiPrices
-            mandis={mandis}
-            prices={mandiPrices}
-          />
-        )}
-
+        {/* View 8: AI Quality Lab */}
         {currentView === 'ai-vision' && (
           <AiVisionLab />
         )}
 
-        {currentView === 'farmer-portal' && currentUser && (
-          <FarmerDashboard
-            currentUser={currentUser}
-            crops={crops}
-            inquiries={inquiries}
-            onAddCrop={handleAddCrop}
-            onDeleteCrop={handleDeleteCrop}
-            onUpdateInquiryStatus={handleUpdateInquiryStatus}
-          />
-        )}
-
+        {/* View 9: Admin Panel */}
         {currentView === 'admin-panel' && (
           <AdminDashboard
             stats={stats}
@@ -326,7 +426,6 @@ export default function App() {
         crop={detailCrop}
         onClose={() => setDetailCrop(null)}
         onSendInquiryClick={(crop) => {
-          // Switch to marketplace and trigger direct inquiry
           setCurrentView('marketplace');
         }}
       />
@@ -335,6 +434,14 @@ export default function App() {
       <AiChatbotModal
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
+      />
+
+      {/* Farmer & Buyer Authentication Modal */}
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onLoginSuccess={(user) => setCurrentUser(user)}
+        availableUsers={availableUsers}
       />
 
       {/* Footer */}
@@ -349,7 +456,7 @@ export default function App() {
                 <span className="font-serif font-bold text-base tracking-tight">MandiMart</span>
               </div>
               <p className="text-emerald-200/80 leading-relaxed">
-                National agricultural direct exchange connecting cultivators directly with institutional buyers, backed by computer vision quality scoring and benchmark mandi tracking.
+                National agricultural direct exchange connecting farmers directly with institutional buyers, backed by Bootstrap responsive design, PHP/Python backend, and MySQL database.
               </p>
               <div className="flex items-center gap-2 text-amber-400 font-semibold text-[11px]">
                 <ShieldCheck className="w-4 h-4" />
@@ -359,34 +466,34 @@ export default function App() {
 
             <div>
               <h4 className="font-bold text-white uppercase tracking-wider text-[11px] mb-3">
-                Core Trading Modules
+                Frontend (Website Design)
               </h4>
               <ul className="space-y-2 text-emerald-200/80">
-                <li><button onClick={() => setCurrentView('marketplace')} className="hover:text-white">Direct Marketplace</button></li>
-                <li><button onClick={() => setCurrentView('auctions')} className="hover:text-white">Live Produce Auctions</button></li>
-                <li><button onClick={() => setCurrentView('mandi-prices')} className="hover:text-white">Mandi Benchmark Index</button></li>
-                <li><button onClick={() => setCurrentView('ai-vision')} className="hover:text-white">AI Vegetable Quality Scanner</button></li>
+                <li><button onClick={() => setCurrentView('marketplace')} className="hover:text-white">🛒 Buyer Marketplace (HTML/CSS/JS)</button></li>
+                <li><button onClick={() => setCurrentView('farmer-portal')} className="hover:text-white">🌾 Farmer Portal (Bootstrap Responsive)</button></li>
+                <li><button onClick={() => setCurrentView('communication')} className="hover:text-white">💬 Buyer-Farmer Negotiation</button></li>
+                <li><button onClick={() => setCurrentView('mandi-prices')} className="hover:text-white">📊 Mandi Rates & Index</button></li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-bold text-white uppercase tracking-wider text-[11px] mb-3">
-                Wholesale Reporting Mandis
+                Backend & Database
               </h4>
               <ul className="space-y-2 text-emerald-200/80">
-                <li>Azadpur Sabzi Mandi (Delhi)</li>
-                <li>Ghazipur Fruit & Vegetable Mandi</li>
-                <li>Keshopur Wholesale Yard</li>
-                <li>Okhla Mandi Phase-II</li>
+                <li><button onClick={() => setCurrentView('backend-hub')} className="hover:text-white">⚙️ PHP Backend (Simple & Beginner-friendly)</button></li>
+                <li><button onClick={() => setCurrentView('backend-hub')} className="hover:text-white">🐍 Python Backend (Flask Microservice)</button></li>
+                <li><button onClick={() => setCurrentView('database')} className="hover:text-white">🗄️ MySQL Database (Farmers, Buyers, Crops)</button></li>
+                <li><button onClick={() => setIsAuthOpen(true)} className="hover:text-white">🔑 Login & Session Auth System</button></li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-bold text-white uppercase tracking-wider text-[11px] mb-3">
-                Academic & Submission
+                Academic & Submission Package
               </h4>
               <p className="text-emerald-200/80 mb-3 leading-relaxed">
-                Complete multi-tier project archive with PHP 8, MySQL relational schema, Python Flask AI microservice, and Express/Vite frontend.
+                Complete multi-tier project archive with HTML, CSS, JavaScript, Bootstrap, PHP, Python Flask, and MySQL schema dump.
               </p>
               <a
                 href="/api/export/zip"
@@ -394,7 +501,7 @@ export default function App() {
                 className="inline-flex items-center gap-1.5 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold px-3 py-2 rounded text-xs transition-colors shadow-sm"
               >
                 <Download className="w-3.5 h-3.5" />
-                Export mandimart.zip
+                Download mandimart-project.zip
               </a>
             </div>
           </div>
@@ -403,8 +510,11 @@ export default function App() {
             <div>
               © 2026 MandiMart Agricultural Exchange. All rights reserved.
             </div>
-            <div className="flex items-center gap-1 text-[11px]">
-              <span>Demo Prototype – Empowering Indian Cultivators</span>
+            <div className="flex items-center gap-2 text-[11px]">
+              <span className="badge bg-emerald-900 border border-emerald-700 text-emerald-200">HTML5 + CSS3 + JS</span>
+              <span className="badge bg-emerald-900 border border-emerald-700 text-emerald-200">Bootstrap 5</span>
+              <span className="badge bg-emerald-900 border border-emerald-700 text-emerald-200">PHP 8 / Python</span>
+              <span className="badge bg-emerald-900 border border-emerald-700 text-emerald-200">MySQL DB</span>
             </div>
           </div>
         </div>

@@ -9,9 +9,14 @@ import {
   Bell, 
   User, 
   Download, 
-  MapPin, 
   ShieldCheck,
-  ChevronDown
+  ChevronDown,
+  MessageSquare,
+  Server,
+  Database,
+  LogIn,
+  Tractor,
+  Building2
 } from 'lucide-react';
 import { User as UserType, Notification } from '../types';
 
@@ -23,6 +28,7 @@ interface NavbarProps {
   availableUsers: UserType[];
   notifications: Notification[];
   onOpenChat: () => void;
+  onOpenAuth: () => void;
   onMarkNotificationsRead: () => void;
 }
 
@@ -34,6 +40,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   availableUsers,
   notifications,
   onOpenChat,
+  onOpenAuth,
   onMarkNotificationsRead,
 }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -42,30 +49,57 @@ export const Navbar: React.FC<NavbarProps> = ({
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
-    <header className="sticky top-0 z-40 bg-[#143D28] text-white border-b border-[#1E5638] shadow-sm">
-      {/* Top Banner Ticker */}
-      <div className="bg-[#0D281A] px-4 py-1.5 text-xs flex flex-wrap items-center justify-between border-b border-[#1E5638]/50">
+    <header className="sticky top-0 z-40 bg-[#143D28] text-white border-b border-[#1E5638] shadow-md">
+      {/* Top Format Banner (Highlighting the User's Exact 3-Tier Architecture) */}
+      <div className="bg-[#0D281A] px-4 py-1.5 text-xs flex flex-wrap items-center justify-between border-b border-[#1E5638]/60">
         <div className="flex items-center gap-2 text-emerald-200">
-          <span className="font-semibold uppercase tracking-wider text-[11px] bg-emerald-900/60 px-2 py-0.5 rounded text-emerald-300 border border-emerald-700/50">
-            Govt. APMC Direct Link
+          <span className="font-bold uppercase tracking-wider text-[10px] bg-amber-400 text-amber-950 px-2 py-0.5 rounded">
+            Project Architecture
           </span>
-          <span className="hidden sm:inline text-emerald-100/80">
-            Azadpur Modal: Tomato ₹1,450/Qtl | Onion ₹2,150/Qtl | Wheat ₹2,275/Qtl
+          <span className="text-emerald-100 text-[11px] hidden sm:inline">
+            <strong>Frontend:</strong> HTML / CSS / JS / Bootstrap &nbsp;|&nbsp; 
+            <strong>Backend:</strong> PHP & Python (Flask) &nbsp;|&nbsp; 
+            <strong>Database:</strong> MySQL
           </span>
         </div>
+
         <div className="flex items-center gap-3">
-          <span className="text-amber-300 font-medium text-[11px] flex items-center gap-1">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-            Demo Data – Indicative Market Rates
-          </span>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => {
+                const farmer = availableUsers.find(u => u.role === 'farmer');
+                if (farmer) setCurrentUser(farmer);
+                setCurrentView('farmer-portal');
+              }}
+              className="text-[11px] px-2 py-0.5 rounded bg-emerald-800/80 hover:bg-emerald-700 text-emerald-200 hover:text-white transition-colors flex items-center gap-1 border border-emerald-600/40"
+              title="Switch to what farmers see on the website"
+            >
+              <Tractor className="w-3 h-3 text-amber-400" />
+              <span>Farmer View</span>
+            </button>
+
+            <button
+              onClick={() => {
+                const buyer = availableUsers.find(u => u.role === 'buyer');
+                if (buyer) setCurrentUser(buyer);
+                setCurrentView('marketplace');
+              }}
+              className="text-[11px] px-2 py-0.5 rounded bg-blue-900/60 hover:bg-blue-800 text-blue-200 hover:text-white transition-colors flex items-center gap-1 border border-blue-600/40"
+              title="Switch to what buyers see on the website"
+            >
+              <Building2 className="w-3 h-3 text-blue-300" />
+              <span>Buyer View</span>
+            </button>
+          </div>
+
           <a
             href="/api/export/zip"
             download
-            className="text-white hover:text-amber-300 text-[11px] flex items-center gap-1 border border-emerald-700 hover:border-amber-400/50 px-2 py-0.5 rounded transition-colors"
-            title="Download complete PHP/MySQL/Python project archive for college viva submission"
+            className="text-amber-300 hover:text-white text-[11px] flex items-center gap-1 bg-amber-950/60 hover:bg-amber-900 border border-amber-600/50 px-2 py-0.5 rounded transition-colors font-bold"
+            title="Download complete PHP/MySQL/Python project archive for college submission"
           >
             <Download className="w-3 h-3" />
-            <span>Export Code (ZIP)</span>
+            <span>Export Full Code (.zip)</span>
           </a>
         </div>
       </div>
@@ -84,93 +118,90 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div>
               <div className="text-xl font-bold tracking-tight text-white flex items-center gap-1.5 font-serif">
                 MandiMart
-                <span className="text-xs bg-amber-400 text-amber-950 font-sans font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
-                  Direct
+                <span className="text-[10px] bg-amber-400 text-amber-950 font-sans font-bold px-1.5 py-0.2 rounded uppercase tracking-wider">
+                  Bootstrap Ready
                 </span>
               </div>
-              <p className="text-[10px] text-emerald-300/80 tracking-wide uppercase font-medium">
-                National Agri-Exchange & Mandi Hub
+              <p className="text-[10px] text-emerald-300/90 tracking-wide uppercase font-medium">
+                Direct Farmer-Buyer Agricultural Marketplace
               </p>
             </div>
           </div>
 
-          {/* Nav Links */}
-          <nav className="hidden md:flex items-center gap-1">
+          {/* Primary Nav Links */}
+          <nav className="hidden lg:flex items-center gap-1">
+            {/* Frontend Group */}
             <button
               onClick={() => setCurrentView('marketplace')}
-              className={`px-3 py-2 text-sm font-medium rounded transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-2 text-xs font-semibold rounded transition-colors flex items-center gap-1.5 ${
                 currentView === 'marketplace'
-                  ? 'bg-emerald-800 text-white font-semibold'
+                  ? 'bg-emerald-800 text-white shadow-xs'
                   : 'text-emerald-100 hover:bg-emerald-900/50 hover:text-white'
               }`}
             >
-              <Store className="w-4 h-4" />
-              Marketplace
+              <Store className="w-3.5 h-3.5" />
+              Buyer Marketplace
             </button>
 
             <button
-              onClick={() => setCurrentView('auctions')}
-              className={`px-3 py-2 text-sm font-medium rounded transition-colors flex items-center gap-1.5 ${
-                currentView === 'auctions'
-                  ? 'bg-emerald-800 text-white font-semibold'
+              onClick={() => setCurrentView('farmer-portal')}
+              className={`px-3 py-2 text-xs font-semibold rounded transition-colors flex items-center gap-1.5 ${
+                currentView === 'farmer-portal'
+                  ? 'bg-emerald-800 text-white shadow-xs'
                   : 'text-emerald-100 hover:bg-emerald-900/50 hover:text-white'
               }`}
             >
-              <Gavel className="w-4 h-4 text-amber-400" />
-              Live Auctions
+              <Tractor className="w-3.5 h-3.5 text-amber-300" />
+              Farmer Portal
+            </button>
+
+            <button
+              onClick={() => setCurrentView('communication')}
+              className={`px-3 py-2 text-xs font-semibold rounded transition-colors flex items-center gap-1.5 ${
+                currentView === 'communication'
+                  ? 'bg-emerald-800 text-white shadow-xs'
+                  : 'text-emerald-100 hover:bg-emerald-900/50 hover:text-white'
+              }`}
+            >
+              <MessageSquare className="w-3.5 h-3.5 text-blue-300" />
+              Buyer-Farmer Chat
             </button>
 
             <button
               onClick={() => setCurrentView('mandi-prices')}
-              className={`px-3 py-2 text-sm font-medium rounded transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-2 text-xs font-semibold rounded transition-colors flex items-center gap-1.5 ${
                 currentView === 'mandi-prices'
-                  ? 'bg-emerald-800 text-white font-semibold'
+                  ? 'bg-emerald-800 text-white shadow-xs'
                   : 'text-emerald-100 hover:bg-emerald-900/50 hover:text-white'
               }`}
             >
-              <TrendingUp className="w-4 h-4 text-emerald-300" />
-              Mandi Rates & GPS
+              <TrendingUp className="w-3.5 h-3.5 text-emerald-300" />
+              Mandi Rates
             </button>
 
             <button
-              onClick={() => setCurrentView('ai-vision')}
-              className={`px-3 py-2 text-sm font-medium rounded transition-colors flex items-center gap-1.5 ${
-                currentView === 'ai-vision'
-                  ? 'bg-emerald-800 text-white font-semibold'
+              onClick={() => setCurrentView('backend-hub')}
+              className={`px-3 py-2 text-xs font-semibold rounded transition-colors flex items-center gap-1.5 ${
+                currentView === 'backend-hub'
+                  ? 'bg-amber-400 text-amber-950 font-bold shadow-xs'
+                  : 'text-amber-300 hover:bg-emerald-900/50 hover:text-white'
+              }`}
+            >
+              <Server className="w-3.5 h-3.5" />
+              Backend (PHP/Python)
+            </button>
+
+            <button
+              onClick={() => setCurrentView('database')}
+              className={`px-3 py-2 text-xs font-semibold rounded transition-colors flex items-center gap-1.5 ${
+                currentView === 'database'
+                  ? 'bg-emerald-800 text-white shadow-xs'
                   : 'text-emerald-100 hover:bg-emerald-900/50 hover:text-white'
               }`}
             >
-              <ScanSearch className="w-4 h-4 text-emerald-300" />
-              AI Quality Lab
+              <Database className="w-3.5 h-3.5 text-teal-300" />
+              Database (MySQL)
             </button>
-
-            {currentUser?.role === 'farmer' && (
-              <button
-                onClick={() => setCurrentView('farmer-portal')}
-                className={`px-3 py-2 text-sm font-medium rounded transition-colors flex items-center gap-1.5 ${
-                  currentView === 'farmer-portal'
-                    ? 'bg-emerald-800 text-white font-semibold'
-                    : 'text-emerald-100 hover:bg-emerald-900/50 hover:text-white'
-                }`}
-              >
-                <Sprout className="w-4 h-4 text-amber-300" />
-                Farmer Portal
-              </button>
-            )}
-
-            {currentUser?.role === 'admin' && (
-              <button
-                onClick={() => setCurrentView('admin-panel')}
-                className={`px-3 py-2 text-sm font-medium rounded transition-colors flex items-center gap-1.5 ${
-                  currentView === 'admin-panel'
-                    ? 'bg-emerald-800 text-white font-semibold'
-                    : 'text-emerald-100 hover:bg-emerald-900/50 hover:text-white'
-                }`}
-              >
-                <ShieldCheck className="w-4 h-4 text-red-400" />
-                Admin Panel
-              </button>
-            )}
           </nav>
 
           {/* Right Action Tools */}
@@ -178,11 +209,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* AI Assistant Button */}
             <button
               onClick={onOpenChat}
-              className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-amber-950 font-bold text-xs sm:text-sm px-3 py-1.5 rounded flex items-center gap-1.5 shadow-sm transition-all"
+              className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-amber-950 font-bold text-xs px-2.5 py-1.5 rounded flex items-center gap-1.5 shadow-sm transition-all"
               title="Open AI Agriculture Assistant"
             >
               <Bot className="w-4 h-4" />
-              <span className="hidden sm:inline">AI Assistant</span>
+              <span className="hidden sm:inline">AI Help</span>
             </button>
 
             {/* Notifications */}
@@ -192,7 +223,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   setShowNotifMenu(!showNotifMenu);
                   if (unreadCount > 0) onMarkNotificationsRead();
                 }}
-                className="p-2 text-emerald-200 hover:text-white hover:bg-emerald-900/50 rounded relative transition-colors"
+                className="p-1.5 text-emerald-200 hover:text-white hover:bg-emerald-900/50 rounded relative transition-colors"
                 title="Notifications"
               >
                 <Bell className="w-5 h-5" />
@@ -202,7 +233,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               {showNotifMenu && (
-                <div className="absolute right-0 mt-2 w-80 bg-white text-slate-900 rounded-lg shadow-xl border border-slate-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="absolute right-0 mt-2 w-80 bg-white text-slate-900 rounded-lg shadow-xl border border-slate-200 py-2 z-50">
                   <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
                       Notifications & Bids
@@ -232,24 +263,35 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Role / User Switcher */}
             <div className="relative">
-              <button
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-2 bg-emerald-900/70 hover:bg-emerald-900 text-white text-xs px-2.5 py-1.5 rounded border border-emerald-700/60 transition-colors"
-              >
-                <User className="w-3.5 h-3.5 text-emerald-300" />
-                <div className="text-left hidden lg:block">
-                  <div className="font-medium leading-none">{currentUser?.name || 'Guest User'}</div>
-                  <div className="text-[10px] text-emerald-300/80 uppercase font-semibold mt-0.5">
-                    Role: {currentUser?.role || 'Visitor'}
+              {currentUser ? (
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center gap-2 bg-emerald-900/80 hover:bg-emerald-900 text-white text-xs px-2.5 py-1.5 rounded border border-emerald-700/60 transition-colors"
+                >
+                  <User className="w-3.5 h-3.5 text-emerald-300" />
+                  <div className="text-left hidden sm:block">
+                    <div className="font-medium leading-none max-w-[100px] truncate">{currentUser.name}</div>
+                    <div className="text-[10px] text-emerald-300/90 uppercase font-semibold mt-0.5">
+                      {currentUser.role}
+                    </div>
                   </div>
-                </div>
-                <ChevronDown className="w-3 h-3 text-emerald-300" />
-              </button>
+                  <ChevronDown className="w-3 h-3 text-emerald-300" />
+                </button>
+              ) : (
+                <button
+                  onClick={onOpenAuth}
+                  className="btn btn-warning btn-sm fw-bold px-3 py-1.5 rounded text-xs d-flex align-items-center gap-1.5 shadow-sm text-amber-950"
+                >
+                  <LogIn className="w-3.5 h-3.5" />
+                  Login / Register
+                </button>
+              )}
 
               {showUserMenu && (
                 <div className="absolute right-0 mt-2 w-64 bg-white text-slate-900 rounded-lg shadow-xl border border-slate-200 py-2 z-50">
-                  <div className="px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
-                    Switch Active Persona (Demo)
+                  <div className="px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 flex items-center justify-between">
+                    <span>Active Personas</span>
+                    <button onClick={onOpenAuth} className="text-emerald-700 hover:underline">New</button>
                   </div>
                   {availableUsers.map(u => (
                     <button
@@ -276,15 +318,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </span>
                     </button>
                   ))}
-                  <div className="border-t border-slate-100 mt-1 pt-1">
+                  <div className="border-t border-slate-100 mt-1 pt-1 px-3">
                     <button
                       onClick={() => {
                         setCurrentUser(null);
                         setShowUserMenu(false);
                       }}
-                      className="w-full text-left px-4 py-1.5 text-xs text-slate-500 hover:bg-slate-100"
+                      className="w-full text-left py-1 text-xs text-red-600 hover:underline"
                     >
-                      Use as Guest Visitor
+                      Log out
                     </button>
                   </div>
                 </div>

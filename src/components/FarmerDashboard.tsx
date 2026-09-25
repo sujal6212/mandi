@@ -12,6 +12,7 @@ import {
   PackageCheck
 } from 'lucide-react';
 import { Crop, Inquiry, User } from '../types';
+import { getAssetUrl } from '../utils/assets';
 
 interface FarmerDashboardProps {
   currentUser: User;

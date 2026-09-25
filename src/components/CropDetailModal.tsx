@@ -12,6 +12,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { Crop } from '../types';
+import { getAssetUrl } from '../utils/assets';
 
 interface CropDetailModalProps {
   crop: Crop | null;
@@ -38,7 +39,7 @@ export const CropDetailModal: React.FC<CropDetailModalProps> = ({
           </button>
 
           <img
-            src={crop.imageUrl}
+            src={getAssetUrl(crop.imageUrl || (crop as any).image)}
             alt={crop.name}
             className="w-36 h-36 object-contain drop-shadow-md"
           />
